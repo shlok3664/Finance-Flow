@@ -1,0 +1,36 @@
+🛠️ Setup and Installation
+This is a single React component file (expense_tracker_app.tsx). To run it, you typically need a standard React development environment (like Create React App or Vite).
+
+1. Configure Your Project
+Create a Project: Start a new React project (e.g., npx create-react-app finance-flow or npm create vite@latest).
+Install Dependencies: This app uses lucide-react for icons and recharts for charts.
+
+npm install lucide-react recharts tailwindcss
+# If using Vite/CRA, ensure you configure Tailwind CSS
+
+Place the Code: Replace the content of your main application file (e.g., src/App.jsx or src/App.tsx) with the content of expense_tracker_app.tsx.
+
+2. Set Up the Gemini API Key
+The application needs a Gemini API key to run the AI features.
+Get your key from Google AI Studio.
+In a standard React environment, you should use a .env file for secrets.
+Create a file named .env in your project root.
+Add your API key:
+REACT_APP_GEMINI_API_KEY="YOUR_API_KEY_HERE"
+Update the Component: In expense_tracker_app.tsx, replace the hardcoded apiKey variable with the environment variable reference:
+
+// expense_tracker_app.tsx (Update this line)// const apiKey = ""; 
+const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
+If you are running this in a protected environment (like the one where this file was generated), the original empty string const apiKey = "" will be automatically handled.
+
+3. Run the Application
+npm start   # or npm run dev for Vite
+Open your browser to the specified port (usually http://localhost:3000).
+
+⚙️ Gemini API Details
+The application uses the gemini-2.5-flash-preview-05-20 model for both tasks:
+Financial Insight
+
+Uses Google Search Grounding (tools: [{ "google_search": {} }]) to provide contextually relevant, real-time tips.
+
+gemini-2.5-flash-preview-05-20
