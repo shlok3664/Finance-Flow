@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { PlusCircle, Trash2, TrendingUp, TrendingDown, DollarSign, Calendar, PieChart, BarChart3, Moon, Sun, Download, Upload, Edit2, Target, Lightbulb, Zap } from 'lucide-react';
 import { PieChart as RechartsP, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, LineChart, Line, CartesianGrid, Legend } from 'recharts';
+import Header from './components/Header';
+import SummaryCards from './components/SummaryCards';
+import TransactionForm from './components/TransactionForm';
+import TransactionList from './components/TransactionList';
 
 // Global variables (mocked/safe for compilation/public repo)
 const __app_id = 'expense-tracker-v1';
-const apiKey = ""; 
+const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
 
 // Utility function for exponential backoff retry logic
 const retryFetch = async (url, options, retries = 3) => {
@@ -110,7 +114,9 @@ export default function App() {
   };
 
   const deleteTransaction = (id) => {
-    setExpenses(expenses.filter(exp => exp.id !== id));
+    if (window.confirm('Are you sure you want to delete this transaction?')) {
+      setExpenses(expenses.filter(exp => exp.id !== id));
+    }
   };
 
   // --- Filtering & Calculations ---
@@ -362,75 +368,25 @@ Provide a concise, single-paragraph analysis (maximum 100 words). Highlight the 
     <div className={bgClass}>
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 font-inter">
         
-        {/* Header & Controls */}
-        <header className="mb-8 text-center relative">
-          <div className="absolute top-0 right-0 flex gap-2">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className={`p-3 rounded-xl ${cardClass} shadow-lg hover:scale-110 transition-all border`}
-              title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            >
-              {darkMode ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-purple-600" />}
-            </button>
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              className={`px-4 py-2 rounded-xl ${cardClass} ${textClass} font-semibold shadow-lg focus:outline-none border`}
-            >
-              {Object.entries(currencies).map(([code, curr]) => (
-                <option key={code} value={code}>{curr.symbol} {code}</option>
-              ))}
-            </select>
-          </div>
-          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
-            Finance Flow
-          </h1>
-          <p className={`${subtextClass} text-lg`}>Smart Financial Management with AI Insights</p>
-        </header>
+        <Header
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+          currency={currency}
+          setCurrency={setCurrency}
+          currencies={currencies}
+          cardClass={cardClass}
+          textClass={textClass}
+          subtextClass={subtextClass}
+        />
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Balance */}
-          <div className={`${cardClass} rounded-2xl shadow-xl p-6 border hover:shadow-2xl transition-all duration-300 hover:scale-105`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm ${subtextClass} mb-1 font-medium`}>Period Balance</p>
-                <p className={`text-3xl font-bold ${balance >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                  {formatCurrency(balance)}
-                </p>
-              </div>
-              <div className={`p-4 rounded-2xl ${balance >= 0 ? 'bg-gradient-to-br from-emerald-400 to-emerald-600' : 'bg-gradient-to-br from-rose-400 to-rose-600'} shadow-lg`}>
-                <DollarSign className="w-7 h-7 text-white" />
-              </div>
-            </div>
-          </div>
-
-          {/* Income */}
-          <div className={`${cardClass} rounded-2xl shadow-xl p-6 border hover:shadow-2xl transition-all duration-300 hover:scale-105`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm ${subtextClass} mb-1 font-medium`}>Period Income</p>
-                <p className="text-3xl font-bold text-emerald-500">{formatCurrency(totalIncome)}</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 shadow-lg">
-                <TrendingUp className="w-7 h-7 text-white" />
-              </div>
-            </div>
-          </div>
-
-          {/* Expenses */}
-          <div className={`${cardClass} rounded-2xl shadow-xl p-6 border hover:shadow-2xl transition-all duration-300 hover:scale-105`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm ${subtextClass} mb-1 font-medium`}>Period Expenses</p>
-                <p className="text-3xl font-bold text-rose-500">{formatCurrency(totalExpense)}</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-rose-400 to-pink-600 shadow-lg">
-                <TrendingDown className="w-7 h-7 text-white" />
-              </div>
-            </div>
-          </div>
-        </div>
+        <SummaryCards
+          balance={balance}
+          totalIncome={totalIncome}
+          totalExpense={totalExpense}
+          formatCurrency={formatCurrency}
+          cardClass={cardClass}
+          subtextClass={subtextClass}
+        />
 
         {/* Gemini AI Insight Card (Feature 1) */}
         <div className={`${cardClass} rounded-2xl shadow-xl p-6 mb-8 border`}>
@@ -605,267 +561,48 @@ Provide a concise, single-paragraph analysis (maximum 100 words). Highlight the 
           </div>
         )}
 
-        {/* Transaction Form */}
-        <div className={`${cardClass} rounded-2xl shadow-xl p-6 mb-8 border`}>
-          <h2 className={`text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6`}>
-            {editingId ? 'Edit Transaction' : 'Add New Transaction'}
-          </h2>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className={`block text-sm font-semibold ${textClass} mb-2 flex justify-between items-center`}>
-                  Description
-                  <button
-                    onClick={suggestCategory}
-                    disabled={!description.trim() || isSuggesting}
-                    className="text-xs bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 py-1 px-2 rounded-full font-medium flex items-center gap-1 disabled:opacity-50 transition-all"
-                  >
-                    {isSuggesting ? (
-                      <svg className="animate-spin h-3 w-3 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    ) : (
-                      '✨ Suggest Category'
-                    )}
-                  </button>
-                </label>
-                <input
-                  type="text"
-                  value={description}
-                  onChange={(e) => {
-                    setDescription(e.target.value);
-                    setSuggestedCategory(null); // Clear suggestion on change
-                  }}
-                  placeholder="Enter description (e.g., Starbucks coffee)"
-                  onKeyPress={(e) => e.key === 'Enter' && addOrUpdateTransaction()}
-                  className={`w-full px-4 py-3 border-2 ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-slate-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all`}
-                />
-              </div>
+        <TransactionForm
+          description={description}
+          setDescription={setDescription}
+          amount={amount}
+          setAmount={setAmount}
+          category={category}
+          setCategory={setCategory}
+          type={type}
+          setType={setType}
+          editingId={editingId}
+          addOrUpdateTransaction={addOrUpdateTransaction}
+          suggestCategory={suggestCategory}
+          isSuggesting={isSuggesting}
+          suggestedCategory={suggestedCategory}
+          setSuggestedCategory={setSuggestedCategory}
+          categories={categories}
+          currency={currency}
+          currencies={currencies}
+          darkMode={darkMode}
+          textClass={textClass}
+          subtextClass={subtextClass}
+        />
 
-              <div>
-                <label className={`block text-sm font-semibold ${textClass} mb-2`}>Amount ({currencies[currency]?.symbol || '$'})</label>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.00"
-                  step="0.01"
-                  onKeyPress={(e) => e.key === 'Enter' && addOrUpdateTransaction()}
-                  className={`w-full px-4 py-3 border-2 ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-slate-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all`}
-                />
-              </div>
-            </div>
-
-            {/* AI Suggestion Display (Feature 2) */}
-            {suggestedCategory && suggestedCategory.category_key !== 'error' && (
-              <div className={`p-3 rounded-xl bg-purple-100 ${darkMode ? 'bg-purple-900/50' : ''} border border-purple-300 text-sm`}>
-                <p className="font-semibold text-purple-700 flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-purple-600" />
-                    AI Suggestion:
-                </p>
-                <p className="mt-1 flex items-center justify-between">
-                  <span>
-                    Best fit is **{categories[suggestedCategory.category_key].icon} {categories[suggestedCategory.category_key].label}**.
-                  </span>
-                  <button 
-                    onClick={() => {
-                      setCategory(suggestedCategory.category_key);
-                      setSuggestedCategory(null);
-                    }}
-                    className="ml-2 text-purple-600 font-bold hover:underline py-1 px-3 rounded-lg bg-purple-200/50 hover:bg-purple-300/50 transition-colors"
-                  >
-                    Use this
-                  </button>
-                </p>
-                <p className={`text-xs ${subtextClass} italic mt-1`}>Reason: {suggestedCategory.confidence_reason}</p>
-              </div>
-            )}
-            {suggestedCategory && suggestedCategory.category_key === 'error' && (
-              <div className={`p-3 rounded-xl bg-red-100 ${darkMode ? 'bg-red-900/50' : ''} border border-red-300 text-sm text-red-700`}>
-                <Zap className="w-4 h-4 inline mr-1" /> Error: {suggestedCategory.confidence_reason}
-              </div>
-            )}
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className={`block text-sm font-semibold ${textClass} mb-2`}>Category</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className={`w-full px-4 py-3 border-2 ${darkMode ? 'border-gray-600 bg-gray-700 text-white' : 'border-slate-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all`}
-                >
-                  {Object.entries(categories).map(([key, cat]) => (
-                    <option key={key} value={key}>{cat.icon} {cat.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={`block text-sm font-semibold ${textClass} mb-2`}>Type</label>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setType('expense')}
-                    className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
-                      type === 'expense'
-                        ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg scale-105'
-                        : `${darkMode ? 'bg-gray-700' : 'bg-slate-100'} ${textClass} hover:bg-slate-200`
-                    }`}
-                  >
-                    Expense
-                  </button>
-                  <button
-                    onClick={() => setType('income')}
-                    className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
-                      type === 'income'
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg scale-105'
-                        : `${darkMode ? 'bg-gray-700' : 'bg-slate-100'} ${textClass} hover:bg-slate-200`
-                    }`}
-                  >
-                    Income
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={addOrUpdateTransaction}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 hover:scale-[1.01]"
-              >
-                <PlusCircle className="w-5 h-5" />
-                {editingId ? 'Update Transaction' : 'Add Transaction'}
-              </button>
-              {editingId && (
-                <button
-                  onClick={() => {
-                    setEditingId(null);
-                    setDescription('');
-                    setAmount('');
-                    setSuggestedCategory(null);
-                  }}
-                  className={`px-6 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-slate-200 hover:bg-slate-300'} ${textClass} font-bold py-4 rounded-xl transition-all`}
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Transactions List */}
-        <div className={`${cardClass} rounded-2xl shadow-xl p-6 border`}>
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-            <h2 className={`text-2xl font-bold ${textClass}`}>Transactions</h2>
-            <div className="flex gap-3 flex-wrap items-center">
-              {/* Search */}
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search description/category..."
-                className={`px-4 py-2 rounded-xl ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-slate-200'} border focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm`}
-              />
-              
-              {/* Date Filter */}
-              <select
-                value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
-                className={`px-4 py-2 rounded-xl ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-slate-200'} border font-medium focus:outline-none text-sm`}
-              >
-                <option value="all">All Time</option>
-                <option value="today">Today</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-                <option value="year">This Year</option>
-              </select>
-
-              {/* Type Filters */}
-              <button
-                onClick={() => setFilter('all')}
-                className={`${buttonBase} ${
-                  filter === 'all'
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                    : `${darkMode ? 'bg-gray-700' : 'bg-slate-100'} ${textClass} hover:bg-slate-200`
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilter('income')}
-                className={`${buttonBase} ${
-                  filter === 'income'
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white'
-                    : `${darkMode ? 'bg-gray-700' : 'bg-slate-100'} ${textClass} hover:bg-slate-200`
-                }`}
-              >
-                Income
-              </button>
-              <button
-                onClick={() => setFilter('expense')}
-                className={`${buttonBase} ${
-                  filter === 'expense'
-                    ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white'
-                    : `${darkMode ? 'bg-gray-700' : 'bg-slate-100'} ${textClass} hover:bg-slate-200`
-                }`}
-              >
-                Expenses
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {finalFilteredExpenses.length === 0 ? (
-              <div className="text-center py-16 text-slate-500">
-                <div className="bg-gradient-to-br from-purple-100 to-pink-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="w-12 h-12 text-purple-600" />
-                </div>
-                <p className="text-lg font-medium">No transactions found</p>
-                <p className="text-sm">Adjust your filters or add a transaction above.</p>
-              </div>
-            ) : (
-              finalFilteredExpenses.map((exp) => (
-                <div
-                  key={exp.id}
-                  className={`flex items-center justify-between p-4 ${darkMode ? 'bg-gray-700/50' : 'bg-gradient-to-r from-slate-50 to-slate-100'} rounded-xl hover:shadow-md transition-all hover:scale-[1.01] border ${darkMode ? 'border-gray-600' : 'border-slate-200'}`}
-                >
-                  <div className="flex items-center gap-4 flex-1">
-                    <div 
-                      className="w-3 h-16 rounded-full shadow-md flex-shrink-0"
-                      style={{ backgroundColor: categories[exp.category]?.color || '#6b7280' }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-semibold ${textClass} truncate text-lg`}>{exp.description}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xs font-medium ${darkMode ? 'bg-gray-600' : 'bg-white'} px-3 py-1 rounded-full ${textClass}`}>
-                          {categories[exp.category]?.icon} {categories[exp.category]?.label}
-                        </span>
-                        <span className="text-xs text-slate-400">•</span>
-                        <span className={`text-xs ${subtextClass}`}>{formatDate(exp.date)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <p className={`text-xl font-bold whitespace-nowrap ${
-                      exp.type === 'income' ? 'text-emerald-500' : 'text-rose-500'
-                    }`}>
-                      {exp.type === 'income' ? '+' : '-'}{formatCurrency(exp.amount)}
-                    </p>
-                    <button
-                      onClick={() => editTransaction(exp)}
-                      className="p-2 text-blue-500 hover:bg-blue-100 rounded-xl transition-all hover:scale-110"
-                    >
-                      <Edit2 className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => deleteTransaction(exp.id)}
-                      className="p-2 text-rose-500 hover:bg-rose-100 rounded-xl transition-all hover:scale-110"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        <TransactionList
+          finalFilteredExpenses={finalFilteredExpenses}
+          categories={categories}
+          formatDate={formatDate}
+          formatCurrency={formatCurrency}
+          editTransaction={editTransaction}
+          deleteTransaction={deleteTransaction}
+          darkMode={darkMode}
+          textClass={textClass}
+          subtextClass={subtextClass}
+          cardClass={cardClass}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          filter={filter}
+          setFilter={setFilter}
+          buttonBase={buttonBase}
+        />
 
         {/* Budget Modal */}
         {showBudgetModal && (
