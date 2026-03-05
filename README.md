@@ -1,17 +1,28 @@
-# Finance-Flow
-Finance Flow: AI-Powered Expense Tracking App
-Finance Flow is a one-file, responsive React application that helps manage one's finances. It comes equipped with a Financial Insight Generator, powered by the Google Gemini API, that analyzes your data to provide practical financial recommendations.
+# Finance Flow
 
-✨ Key Features
-This AI Financial Insights (Gemini): Get quick, practical recommendations on how you're spending money and where your budget is.
-Tracking & Budgeting: Track income/expenses, allocate data, and budget with visual progress reports.
-Visualization: Interactive charts (Pie, Bar) show you where the money is going.
-Data Management: Export and import all the financial data as a JSON backup with ease.
+Finance Flow is an AI-powered expense tracking and financial management application. It helps users track their income and expenses, set budgets, and gain smart financial insights using the Google Gemini API.
 
-🛠️  Tech Stack
-The Front-end: React, Tailwind CSS
-AI: Google Gemini API
-Charts: Recharts
+## ✨ Key Features
 
-License: This project is licensed under the MIT License.
-This is ready to be committed to your repository! Let me know if you'd like to proceed with the final GitHub steps now.
+- **AI Financial Insights (Gemini)**: Get personalized, actionable recommendations based on your spending habits.
+- **AI Category Suggestion**: Automatically suggest categories for your transactions using AI.
+- **Tracking & Budgeting**: Manage income and expenses, set category-specific budgets, and monitor progress.
+- **Visualizations**: Interactive pie and bar charts for category breakdowns and 7-day trends.
+- **Data Persistence**: Your data is saved locally in your browser's `localStorage`.
+- **Responsive Design**: Fully responsive UI with Dark Mode support.
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React, TypeScript, Vite
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **Charts**: Recharts
+- **AI**: Google Gemini API
+
+## 🚀 Getting Started
+
+Please refer to [INSTALLATION.md](./INSTALLATION.md) for detailed setup and installation instructions.
+
+## 📝 License
+
+This project is licensed under the MIT License.
