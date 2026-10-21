@@ -15,7 +15,7 @@ Finance Flow is an AI-powered expense tracking and financial management applicat
 
 - **Frontend**: React, TypeScript, Vite
 - **Styling**: Tailwind CSS
-- **Icons**: Lucide React
+- **Icons**: Lucide React 
 - **Charts**: Recharts
 - **AI**: Google Gemini API
 
