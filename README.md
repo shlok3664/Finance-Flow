@@ -26,3 +26,6 @@ Please refer to [INSTALLATION.md](./INSTALLATION.md) for detailed setup and inst
 ## 📝 License
 
 This project is licensed under the MIT License.
+
+
+## Thanks
